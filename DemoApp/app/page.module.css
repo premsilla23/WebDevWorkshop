@@ -1,27 +1,420 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600&display=swap");
+
 .main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  --ink: #0b0f14;
+  --ink-2: #11161d;
+  --ink-3: #171e27;
+  --purple: #e45dff;
+  --cyan: #5eead4;
+  --paper: #edeff2;
+  --slate: #8b95a1;
+  --green: #4ade80;
+  --border: rgba(237, 239, 242, 0.08);
 
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
+/* ---------- status bar ---------- */
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--slate);
+  border-bottom: 1px solid var(--border);
+}
+
+.statusDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
+  animation: pulseDot 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.statusDivider {
+  opacity: 0.3;
+}
+
+@keyframes pulseDot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 1.5rem 5rem;
+  isolation: isolate;
+  cursor: crosshair;
+  user-select: none;
+  --mx: 50%;
+  --my: 40%;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(
+    480px circle at var(--mx) var(--my),
+    rgba(228, 93, 255, 0.12),
+    transparent 65%
+  );
+  transition: background 0.15s ease-out;
+}
+
+.circuitBg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.55;
+  mask-image: radial-gradient(ellipse at center, black 55%, transparent 90%);
+}
+
+.circuitSvg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Continuous looping animation across circuit traces */
+.trace {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 120 600;
+  stroke-dashoffset: 720;
+  opacity: 0.65;
+  animation: loopTrace 4s linear infinite;
+}
+
+@keyframes loopTrace {
+  0% {
+    stroke-dashoffset: 720;
+  }
+  100% {
+    stroke-dashoffset: -720;
+  }
+}
+
+/* Click interactive elements */
+.clickPulse {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+.pulseTag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--cyan);
+  background: rgba(11, 15, 20, 0.85);
+  border: 1px solid var(--cyan);
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 0 10px var(--cyan);
+  animation: floatFade 1.2s ease-out forwards;
+}
+
+@keyframes floatFade {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(0.8);
+  }
+  50% {
+    transform: translateY(-15px) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+}
+
+.title {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  line-height: 1.02;
+  font-size: clamp(2.6rem, 8vw, 5.2rem);
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--paper);
+}
+
+.titleSubheader {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  line-height: 1.02;
+  font-size: clamp(1.5rem, 8vw, 1.8rem);
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--paper);
+  display: block;
+}
+
+.titleAccent {
+  display: block;
+  background: linear-gradient(100deg, var(--purple) 10%, var(--cyan) 90%);
+  font-size: clamp(1.6rem, 8vw, 3.2rem);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  font-family: var(--font-mono);
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  color: var(--slate);
+  margin: 1.6rem 0 3rem;
+  min-height: 1.4em;
+}
+
+.cursor {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1em;
+  margin-left: 2px;
+  background: var(--cyan);
+  vertical-align: text-bottom;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------- buttons ---------- */
+
 .buttonRow {
-    display: flex;
-    gap: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 2;
+}
+
+.linkWrap {
+  text-decoration: none;
 }
 
 .button {
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: black;
-    color: white;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.9rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--ink-2);
+  color: var(--paper);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  transform: translateX(-120%);
+  transition: transform 0.5s ease;
 }
 
 .button:hover {
-    background: grey;
+  transform: translateY(-2px);
+}
+
+.button:hover::after {
+  transform: translateX(120%);
+}
+
+.button:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.prompt {
+  color: var(--slate);
+}
+
+.arrow {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.button:hover .arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.buttonPrimary {
+  border-color: rgba(207, 134, 255, 0.4);
+}
+
+.buttonPrimary:hover {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 1px rgba(180, 77, 201, 0.3), 0 8px 24px -8px rgba(180, 77, 201, 0.5);
+  background: var(--ink-3);
+}
+
+.buttonPrimary .arrow {
+  color: var(--purple);
+}
+
+.buttonSecondary {
+  border-color: rgba(94, 234, 212, 0.35);
+}
+
+.buttonSecondary:hover {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 1px rgba(94, 234, 212, 0.3), 0 8px 24px -8px rgba(94, 234, 212, 0.5);
+  background: var(--ink-3);
+}
+
+.buttonSecondary .arrow {
+  color: var(--cyan);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+/* ---------- marquee ---------- */
+
+/* ---------- marquee ---------- */
+
+.marquee {
+  border-top: 1px solid var(--border);
+  overflow: hidden;
+  padding: 1.1rem 0;
+  background: var(--ink-2);
+}
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: scroll 26s linear infinite;
+}
+
+.marquee:hover .marqueeTrack {
+  animation-play-state: paused;
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marqueeItem {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--slate);
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 0 1.6rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+
+.marqueeItem:hover {
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(94, 234, 212, 0.4);
+}
+
+.marqueeDot {
+  color: var(--purple);
+  opacity: 0.6;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 560px) {
+  .hero {
+    padding: 4.5rem 1.25rem 3.5rem;
+  }
+
+  .buttonRow {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .statusBar {
+    flex-wrap: wrap;
+    font-size: 0.62rem;
+  }
+}
+
+/* ---------- motion preference ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .statusDot,
+  .trace,
+  .cursor,
+  .marqueeTrack,
+  .button::after {
+    animation: none !important;
+  }
+
+  .trace {
+    stroke-dashoffset: 0;
+  }
 }
