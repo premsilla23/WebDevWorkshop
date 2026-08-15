@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flexbox & Box Model Monkeys Mini-Game</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --panel: #101725;
+    --panel-deep: #0b111d;
+    --panel-soft: #151e2d;
+    --panel-raised: #1a2434;
+    --line: rgba(255, 255, 255, 0.09);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --text: #f4f7f2;
+    --text-soft: #aeb9c7;
+    --text-muted: #748196;
+    --lime: #c5f23a;
+    --lime-dark: #8dbd19;
+    --amber: #ffbf57;
+    --coral: #ff765c;
+    --editor: #090e17;
+    --editor-line: #172131;
+    --radius-lg: 22px;
+    --radius-md: 14px;
+    --radius-sm: 9px;
+  }
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    height: 100vh;
+    background: #43a047;
+    overflow: hidden;
+  }
+
+  #sidebar {
+    width: 42%;
+    min-width: 440px;
+    position: relative;
+    background: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px), var(--panel);
+    background-size: 32px 32px;
+    color: var(--text);
+    padding: 28px 34px 30px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 18px 0 45px rgba(3, 7, 14, 0.22);
+    z-index: 10;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255,255,255,.07);
+  }
+
+  #sidebar::before {
+    content: "";
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    top: -260px;
+    left: -180px;
+    background: rgba(197, 242, 58, 0.055);
+    border-radius: 50%;
+    filter: blur(5px);
+    pointer-events: none;
+  }
+
+  #sidebar::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(197,242,58,.45) 22%, rgba(197,242,58,.12) 65%, transparent);
+    pointer-events: none;
+  }
+
+  #sidebar > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  #chapter-select {
+    width: 100%;
+    height: 56px;
+    padding: 0 48px 0 18px;
+    margin-bottom: 32px;
+    appearance: none;
+    background: linear-gradient(90deg, rgba(197,242,58,.08), rgba(197,242,58,.025));
+    color: var(--text);
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: .015em;
+    outline: none;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.035), 0 8px 24px rgba(0,0,0,.12);
+    transition: border-color .2s ease, background .2s ease, box-shadow .2s ease, transform .2s ease;
+    background-image: linear-gradient(45deg, transparent 50%, var(--lime) 50%), linear-gradient(135deg, var(--lime) 50%, transparent 50%);
+    background-position: calc(100% - 21px) 23px, calc(100% - 15px) 23px;
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+  }
+
+  #chapter-select:hover {
+    border-color: rgba(197,242,58,.4);
+    background-color: rgba(197,242,58,.055);
+    transform: translateY(-1px);
+  }
+
+  #chapter-select:focus {
+    border-color: rgba(197,242,58,.65);
+    box-shadow: 0 0 0 3px rgba(197,242,58,.08), 0 10px 30px rgba(0,0,0,.18);
+  }
+
+  #chapter-select option {
+    background: #111a28;
+    color: #f4f7f2;
+  }
+
+  #level-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  #level-title {
+    margin: 0;
+    color: var(--text);
+    font-size: clamp(1.75rem, 2.5vw, 2.5rem);
+    line-height: 1.02;
+    font-weight: 850;
+    letter-spacing: -0.045em;
+    max-width: 72%;
+    text-wrap: balance;
+  }
+
+  #level-title::before {
+    content: "";
+    display: block;
+    width: 28px;
+    height: 4px;
+    margin-bottom: 12px;
+    background: var(--lime);
+    border-radius: 99px;
+    box-shadow: 0 0 14px rgba(197,242,58,.25);
+  }
+
+  #progress {
+    flex-shrink: 0;
+    margin-bottom: 5px;
+    padding: 7px 10px;
+    color: var(--lime);
+    background: rgba(197,242,58,.075);
+    border: 1px solid rgba(197,242,58,.18);
+    border-radius: 8px;
+    font-size: 0.67rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .13em;
+    white-space: nowrap;
+  }
+
+  #instructions {
+    position: relative;
+    font-size: 1rem;
+    line-height: 1.72;
+    margin-bottom: 24px;
+    padding: 16px 20px 16px 22px;
+    color: #c6cfda;
+    background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.018));
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    box-shadow: 0 12px 30px rgba(0,0,0,.10);
+    overflow: hidden;
+  }
+
+  #instructions::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--amber);
+  }
+
+  #instructions b {
+    color: #f5f7f2;
+  }
+
+  #instructions code {
+    color: var(--lime);
+    background: rgba(197,242,58,.08);
+    border: 1px solid rgba(197,242,58,.16);
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: .9em;
+    font-weight: 700;
+  }
+
+  .editor {
+    position: relative;
+    background: var(--editor);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 45px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.035);
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+  }
+
+  .editor:focus-within {
+    border-color: rgba(197,242,58,.38);
+    box-shadow: 0 20px 50px rgba(0,0,0,.28), 0 0 0 3px rgba(197,242,58,.055);
+  }
+
+  .editor pre {
+    margin: 0;
+    color: #8997aa;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: .98rem;
+    font-weight: 600;
+    line-height: 1.8;
+  }
+
+  #css-selector {
+    padding: 18px 20px 0;
+  }
+
+  .editor > pre:last-child {
+    padding: 0 20px 18px;
+  }
+
+  textarea {
+    display: block;
+    width: calc(100% - 40px);
+    min-height: 82px;
+    margin: 0 20px;
+    padding: 3px 0 3px 20px;
+    background: linear-gradient(90deg, rgba(197,242,58,.045) 0, rgba(197,242,58,.045) 1px, transparent 1px);
+    background-size: 20px 100%;
+    border: none;
+    border-left: 1px solid rgba(197,242,58,.18);
+    color: #f3f7ee;
+    caret-color: var(--lime);
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.65;
+    outline: none;
+    resize: none;
+  }
+
+  textarea::selection {
+    background: rgba(197,242,58,.24);
+  }
+
+  button {
+    position: relative;
+    margin-top: auto;
+    width: 100%;
+    min-height: 58px;
+    padding: 16px 20px;
+    background: var(--lime);
+    color: #182009;
+    border: none;
+    border-radius: 12px;
+    font-size: .88rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(197,242,58,.14);
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+
+  button::after {
+    content: "→";
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.25rem;
+    font-weight: 500;
+    transition: transform .2s ease;
+  }
+
+  button:hover:not(:disabled) {
+    background: #d2f84e;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(197,242,58,.22);
+  }
+
+  button:hover:not(:disabled)::after {
+    transform: translate(4px, -50%);
+  }
+
+  button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(197,242,58,.13);
+  }
+
+  button:disabled {
+    background: #202a38;
+    color: #566275;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  button:disabled::after {
+    opacity: .3;
+  }
+
+  #game-board {
+    width: 58%;
+    position: relative;
+    padding: 2rem;
+    background: radial-gradient(circle at 15% 20%, rgba(139,195,74,.35) 0 8%, transparent 9%), radial-gradient(circle at 85% 18%, rgba(76,175,80,.3) 0 10%, transparent 11%), linear-gradient(135deg, #2e7d32 0%, #66bb6a 42%, #8d6e63 43%, #a1887f 58%, #66bb6a 59%, #2e7d32 100%);
+    background-size: auto, auto, auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  #game-board::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: .22;
+    background-image: radial-gradient(ellipse at 20% 80%, #1b5e20 0 7px, transparent 8px), radial-gradient(ellipse at 80% 25%, #1b5e20 0 6px, transparent 7px), radial-gradient(ellipse at 35% 15%, #388e3c 0 5px, transparent 6px), radial-gradient(ellipse at 70% 85%, #388e3c 0 5px, transparent 6px);
+    background-size: 85px 70px, 110px 90px, 75px 100px, 120px 80px;
+  }
+
+  #game-board::after {
+    content: "";
+    position: absolute;
+    width: 58%;
+    height: 125%;
+    left: 21%;
+    top: -12%;
+    pointer-events: none;
+    transform: rotate(-7deg);
+    background: linear-gradient(90deg, transparent, rgba(255,235,180,.13) 12%, rgba(255,235,180,.2) 50%, rgba(255,235,180,.13) 88%, transparent);
+    border-radius: 50%;
+  }
+
+  #pond-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    aspect-ratio: 1 / 1;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    z-index: 5;
+  }
+
+  #lilypads,
+  #pond {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    padding: 15px;
+    align-items: flex-start;
+  }
+
+  #pond {
+    z-index: 2;
+  }
+
+  #lilypads {
+    z-index: 1;
+  }
+
+  .lilypad,
+  .frog {
+    transform: scaleX(-1);
+    transition: transform 2.2s cubic-bezier(0.22, 1, 0.36, 1);
+    width: clamp(36px, 8vw, 65px);
+    height: clamp(36px, 8vw, 65px);
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  .bm-base {
+    background: rgba(109, 76, 65, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    transition: all 0.3s;
+    box-sizing: content-box;
+  }
+
+  .bm-pad-10 {
+    padding: 10px;
+  }
+
+  .bm-pad-20 {
+    padding: 20px;
+  }
+
+  .bm-pad-30 {
+    padding: 30px;
+  }
+
+  .content-marker {
+    width: 65px;
+    height: 65px;
+    box-sizing: content-box;
+    border: 2px dashed rgba(255, 235, 59, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .win-bounce {
+    animation: monkeyCelebrate 0.7s ease-in-out infinite alternate;
+    transition: none;
+    filter: drop-shadow(0 0 10px rgba(255, 235, 59, 0.85));
+  }
+
+  .banana-caught {
+    animation: bananaCelebrate 0.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(255, 235, 59, 0.95));
+  }
+
+  #pond.celebrating::after {
+    content: "🎉";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0.2);
+    font-size: clamp(45px, 9vw, 80px);
+    animation: celebrationBurst .9s ease-out forwards;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .confetti {
+    position: absolute;
+    width: 9px;
+    height: 15px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 30;
+    animation: confettiFall 1s ease-out forwards;
+  }
+
+  @keyframes monkeyCelebrate {
+    0% {
+      transform: translateY(0) rotate(-4deg) scaleX(-1) scaleY(1);
+    }
+    50% {
+      transform: translateY(-16px) rotate(4deg) scaleX(-1) scaleY(1.08);
+    }
+    100% {
+      transform: translateY(-4px) rotate(-2deg) scaleX(-1) scaleY(1.03);
+    }
+  }
+
+  @keyframes bananaCelebrate {
+    0%,
+    100% {
+      transform: rotate(0deg) scale(1);
+    }
+    25% {
+      transform: rotate(-18deg) scale(1.08);
+    }
+    50% {
+      transform: rotate(18deg) scale(1.16);
+    }
+    75% {
+      transform: rotate(-10deg) scale(1.08);
+    }
+  }
+
+  @keyframes celebrationBurst {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(.2);
+    }
+    45% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.25);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(1.8);
+    }
+  }
+
+  @keyframes confettiFall {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--dx), var(--dy)) rotate(520deg) scale(.65);
+    }
+  }
+
+  @media (min-width: 769px) {
+    #sidebar {
+      width: 42%;
+    }
+    #game-board {
+      width: 58%;
+    }
+  }
+
+  @media (max-width: 768px) {
+    body {
+      flex-direction: column;
+      height: auto;
+      min-height: 100vh;
+      overflow: auto;
+    }
+    #game-board {
+      width: 100%;
+      padding: 1rem;
+      min-height: 350px;
+      order: 1;
+    }
+    #sidebar {
+      width: 100%;
+      min-width: auto;
+      padding: 22px 20px 24px;
+      order: 2;
+      overflow: visible;
+      box-shadow: 0 -12px 35px rgba(3, 7, 14, .2);
+    }
+    #sidebar::after {
+      display: none;
+    }
+    #chapter-select {
+      margin-bottom: 25px;
+    }
+    #level-header {
+      align-items: flex-start;
+    }
+    #level-title {
+      font-size: 1.8rem;
+    }
+    #progress {
+      margin-top: 4px;
+    }
+    #instructions {
+      font-size: .96rem;
+      padding: 18px;
+    }
+    .editor pre,
+    textarea {
+      font-size: .92rem;
+    }
+    #pond-container {
+      max-width: 90vw;
+      max-height: 90vw;
+    }
+    button {
+      margin-top: 4px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #sidebar {
+      padding: 18px 16px 20px;
+    }
+    #level-header {
+      gap: 10px;
+    }
+    #level-title {
+      font-size: 1.5rem;
+    }
+    #progress {
+      font-size: .58rem;
+      padding: 6px 8px;
+    }
+    #instructions {
+      line-height: 1.65;
+    }
+    .editor {
+      border-radius: 16px;
+    }
+    textarea {
+      min-height: 76px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+  <div id="sidebar">
+
+    <select id="chapter-select">
+      <option value="flexbox">Chapter 1: Flexbox Layouts</option>
+      <option value="boxmodel">Chapter 2: The Box Model</option>
+    </select>
+
+    <div id="level-header">
+      <h1 id="level-title">Level 1</h1>
+      <div id="progress">Level 1 of 15</div>
+    </div>
+
+    <div id="instructions"></div>
+
+    <div class="editor">
+      <pre id="css-selector">#pond {</pre>
+
+      <textarea
+        id="css-input"
+        rows="3"
+        spellcheck="false"
+        autofocus
+      ></textarea>
+
+      <pre>}</pre>
+    </div>
+
+    <button id="next-btn" disabled>
+      Next Level
+    </button>
+
+  </div>
+
+
+  <div id="game-board">
+    <div id="pond-container">
+      <div id="lilypads"></div>
+      <div id="pond"></div>
+    </div>
+  </div>
+
+<script>
+  const FROG_IMG = "https://openmoji.org/data/color/svg/1F412.svg";
+  const LILYPAD_IMG = "https://openmoji.org/data/color/svg/1F34C.svg";
+
+  const chapters = {
+    flexbox: [
+      {
+        title: "Justify Content",
+        instructions: "Welcome! Guide the monkey to the banana on the right by typing <code>justify-content: flex-end;</code> into the editor below.",
+        frogCount: 1,
+        targetCSS: {
+          "justify-content": "flex-end"
+        },
+        lilypadStyles: {
+          "justify-content": "flex-end"
+        }
+      },
+      {
+        title: "Center Alignment",
+        instructions: "Use <code>justify-content</code> again to put these two monkeys perfectly in the center of the clearing. Try the value <code>center</code>.",
+        frogCount: 2,
+        targetCSS: {
+          "justify-content": "center"
+        },
+        lilypadStyles: {
+          "justify-content": "center"
+        }
+      },
+      {
+        title: "Space Around",
+        instructions: "Distribute the monkeys evenly with equal space around them using <code>justify-content: space-around;</code>.",
+        frogCount: 3,
+        targetCSS: {
+          "justify-content": "space-around"
+        },
+        lilypadStyles: {
+          "justify-content": "space-around"
+        }
+      },
+      {
+        title: "Space Between",
+        instructions: "Now the bananas are pushed to the edges. Use <code>justify-content: space-between;</code> to space the monkeys apart.",
+        frogCount: 3,
+        targetCSS: {
+          "justify-content": "space-between"
+        },
+        lilypadStyles: {
+          "justify-content": "space-between"
+        }
+      },
+      {
+        title: "Space Evenly",
+        instructions: "Ensure the space between the monkeys, and the space before the first monkey, is exactly the same using <code>justify-content: space-evenly;</code>.",
+        frogCount: 3,
+        targetCSS: {
+          "justify-content": "space-evenly"
+        },
+        lilypadStyles: {
+          "justify-content": "space-evenly"
+        }
+      },
+      {
+        title: "Align Items",
+        instructions: "The <code>align-items</code> property aligns elements vertically. Move the monkeys to the bottom using <code>align-items: flex-end;</code>.",
+        frogCount: 3,
+        targetCSS: {
+          "align-items": "flex-end"
+        },
+        lilypadStyles: {
+          "align-items": "flex-end"
+        }
+      },
+      {
+        title: "Align Center",
+        instructions: "Center the monkeys vertically using <code>align-items: center;</code>.",
+        frogCount: 3,
+        targetCSS: {
+          "align-items": "center"
+        },
+        lilypadStyles: {
+          "align-items": "center"
+        }
+      },
+      {
+        title: "Bullseye",
+        instructions: "Combine <b>both</b> <code>justify-content</code> and <code>align-items</code> to move the monkey to the exact center of the clearing.",
+        frogCount: 1,
+        targetCSS: {
+          "justify-content": "center",
+          "align-items": "center"
+        },
+        lilypadStyles: {
+          "justify-content": "center",
+          "align-items": "center"
+        }
+      },
+      {
+        title: "Flex Direction",
+        instructions: "The <code>flex-direction</code> property defines the direction items are placed. Stack the monkeys vertically using <code>flex-direction: column;</code>.",
+        frogCount: 3,
+        targetCSS: {
+          "flex-direction": "column"
+        },
+        lilypadStyles: {
+          "flex-direction": "column"
+        }
+      },
+      {
+        title: "Mind the Gap",
+        instructions: "Sometimes you just want exact spacing! Use the <code>gap</code> property to put exactly <code>20px</code> of empty space between the monkeys.",
+        frogCount: 3,
+        targetCSS: {
+          gap: "20px"
+        },
+        lilypadStyles: {
+          gap: "20px"
+        }
+      },
+      {
+        title: "Direction & Justify",
+        instructions: "Properties behave differently based on direction. Push the top and bottom monkeys to the edges using <code>flex-direction: column;</code> and <code>justify-content: space-between;</code>.",
+        frogCount: 3,
+        targetCSS: {
+          "flex-direction": "column",
+          "justify-content": "space-between"
+        },
+        lilypadStyles: {
+          "flex-direction": "column",
+          "justify-content": "space-between"
+        }
+      },
+      {
+        title: "Flex Wrap",
+        instructions: "There are too many monkeys! Use <code>flex-wrap: wrap;</code> to let them form multiple rows instead of overflowing the screen.",
+        frogCount: 15,
+        targetCSS: {
+          "flex-wrap": "wrap"
+        },
+        lilypadStyles: {
+          "flex-wrap": "wrap"
+        }
+      },
+      {
+        title: "Wrap Reverse",
+        instructions: "You can also wrap items upwards instead of downwards. Watch them build rows from bottom to top using <code>flex-wrap: wrap-reverse;</code>.",
+        frogCount: 15,
+        targetCSS: {
+          "flex-wrap": "wrap-reverse"
+        },
+        lilypadStyles: {
+          "flex-wrap": "wrap-reverse"
+        }
+      },
+      {
+        title: "Align Content",
+        instructions: "When wrapping into rows, <code>align-content</code> spaces the rows themselves. Pack them together at the top using <code>flex-wrap: wrap;</code> and <code>align-content: flex-start;</code>.",
+        frogCount: 15,
+        targetCSS: {
+          "flex-wrap": "wrap",
+          "align-content": "flex-start"
+        },
+        lilypadStyles: {
+          "flex-wrap": "wrap",
+          "align-content": "flex-start"
+        }
+      },
+      {
+        title: "The Grand Finale",
+        instructions: "Bring the whole crowd to the exact middle of the clearing using <code>flex-wrap: wrap;</code> and <code>align-content: center;</code>.",
+        frogCount: 15,
+        targetCSS: {
+          "flex-wrap": "wrap",
+          "align-content": "center"
+        },
+        lilypadStyles: {
+          "flex-wrap": "wrap",
+          "align-content": "center"
+        }
+      }
+    ],
+
+    boxmodel: [
+      {
+        title: "Size Matters: Width & Height",
+        instructions: "Every box has a <code>width</code> and a <code>height</code> — they set the box's size directly. Resize this crate to fill the outline by setting <code>width: 200px;</code> and <code>height: 120px;</code>.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          width: "200px",
+          height: "120px"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
+              <div style="position:absolute; border:3px dashed rgba(255,255,255,0.4); width:200px; height:120px; box-sizing:content-box;"></div>
+              <div id="target-box" class="bm-base" style="width:65px; height:65px;">
+                <img src="${FROG_IMG}" class="frog" style="display:block;">
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Padding (Inner Space)",
+        instructions: "The <span style='color:#FFEB3B;'>yellow dashed square</span> marks the monkey's content area — it never changes size. <code>padding</code> adds empty space <b>between that content and the edge of the box</b>, growing the box around it. Add <code>padding: 30px;</code> to push the box edge out to the white outline.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          padding: "30px"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
+              <div style="position:absolute; border:3px dashed rgba(255,255,255,0.4); width:125px; height:125px; box-sizing:border-box;"></div>
+              <div id="target-box" class="bm-base">
+                <div class="content-marker">
+                  <img src="${FROG_IMG}" class="frog" style="display:block;">
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Padding on One Side",
+        instructions: "You can target just one side of the box! The monkey's <span style='color:#FFEB3B;'>yellow-outlined</span> content stays put at the top — <code>padding-bottom: 50px;</code> only adds empty space below it, stretching the box down to the white outline.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          "padding-bottom": "50px"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:flex-start; height:115px;">
+              <div style="position:absolute; top:0; border:3px dashed rgba(255,255,255,0.4); width:65px; height:115px; box-sizing:content-box;"></div>
+              <div id="target-box" class="bm-base">
+                <div class="content-marker">
+                  <img src="${FROG_IMG}" class="frog" style="display:block;">
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Border (The Outline)",
+        instructions: "<code>border</code> wraps around the padding and content. Give this box a border to match the thick outline using <code>border: 15px solid #81C784;</code>.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          "border-width": "15px",
+          "border-style": "solid"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
+              <div style="position:absolute; border:15px dashed rgba(255,255,255,0.4); width:115px; height:115px; box-sizing:border-box;"></div>
+              <div id="target-box" class="bm-base bm-pad-10">
+                <img src="${FROG_IMG}" class="frog" style="display:block;">
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Margin (Outer Space)",
+        instructions: "<code>margin</code> adds invisible space <b>outside</b> the element, pushing other elements away. These two monkeys are too close! Push them apart by giving them <code>margin: 30px;</code>.",
+        selectorName: ".box {",
+        targetClass: "target-box",
+        targetCSS: {
+          margin: "30px"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:absolute; display:flex; gap:60px;">
+              <div style="border:3px dashed rgba(255,255,255,0.4); width:105px; height:105px;"></div>
+              <div style="border:3px dashed rgba(255,255,255,0.4); width:105px; height:105px;"></div>
+            </div>
+            <div style="display:flex; z-index:2;">
+              <div class="target-box bm-base bm-pad-20">
+                <img src="${FROG_IMG}" class="frog" style="display:block;">
+              </div>
+              <div class="target-box bm-base bm-pad-20">
+                <img src="${FROG_IMG}" class="frog" style="display:block;">
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Rounding Corners",
+        instructions: "Use <code>border-radius: 10px;</code> to slightly round the sharp corners of the box.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          "border-radius": "10px"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
+              <div style="position:absolute; border:3px dashed rgba(255,255,255,0.4); border-radius:10px; width:125px; height:125px; box-sizing:border-box;"></div>
+              <div id="target-box" class="bm-base bm-pad-30">
+                <img src="${FROG_IMG}" class="frog" style="display:block;">
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Platforms are Round",
+        instructions: "Monkey platforms are round! Turn the square into a perfect circle using <code>border-radius: 50%;</code>.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          "border-radius": "50%"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
+              <div style="position:absolute; border:3px dashed rgba(255,255,255,0.4); border-radius:50%; width:125px; height:125px; box-sizing:border-box;"></div>
+              <div id="target-box" class="bm-base bm-pad-30">
+                <img src="${FROG_IMG}" class="frog" style="display:block;">
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Mix It Up: Padding + Border",
+        instructions: "Real boxes usually need more than one property at once. The <span style='color:#FFEB3B;'>yellow-outlined</span> monkey content stays fixed size — <code>padding: 20px;</code> opens a gap around it, then <code>border: 8px solid #81C784;</code> wraps a green ring around that gap. Set both to match the outline.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          padding: "20px",
+          "border-width": "8px",
+          "border-style": "solid"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
+              <div style="position:absolute; border:8px dashed rgba(255,255,255,0.4); width:121px; height:121px; box-sizing:border-box;"></div>
+              <div id="target-box" class="bm-base">
+                <div class="content-marker">
+                  <img src="${FROG_IMG}" class="frog" style="display:block;">
+                </div>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "Shaping the Platform",
+        instructions: "Combine <code>width</code>, <code>height</code>, and <code>border-radius</code> to turn this square crate into a wide oval platform. Use <code>width: 160px;</code>, <code>height: 90px;</code>, and <code>border-radius: 45px;</code>.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          width: "160px",
+          height: "90px",
+          "border-radius": "45px"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
+              <div style="position:absolute; border:3px dashed rgba(255,255,255,0.4); border-radius:45px; width:160px; height:90px; box-sizing:content-box;"></div>
+              <div id="target-box" class="bm-base" style="width:65px; height:65px;">
+                <img src="${FROG_IMG}" class="frog" style="display:block;">
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        title: "The Ultimate Box",
+        instructions: "The grand finale! Combine everything you've learned to build the perfect monkey platform: <code>width: 100px;</code>, <code>height: 100px;</code>, <code>padding-bottom: 20px;</code>, <code>border: 5px solid #81C784;</code>, and <code>border-radius: 50%;</code>.",
+        selectorName: "#box {",
+        targetId: "target-box",
+        targetCSS: {
+          width: "100px",
+          height: "100px",
+          "padding-bottom": "20px",
+          "border-width": "5px",
+          "border-style": "solid",
+          "border-radius": "50%"
+        },
+        html: `
+          <div style="width:100%; height:100%; display:flex; justify-content:center; align-items:center;">
+            <div style="position:relative; display:flex; justify-content:center; align-items:center;">
+              <div style="position:absolute; border:5px dashed rgba(255,255,255,0.4); border-radius:50%; width:110px; height:130px; box-sizing:border-box;"></div>
+              <div id="target-box" class="bm-base">
+                <img src="${FROG_IMG}" class="frog" style="display:block;">
+              </div>
+            </div>
+          </div>
+        `
+      }
+    ]
+  };
+
+  let currentChapter = "flexbox";
+  let currentLevel = 0;
+  let celebrationTimer = null;
+
+  const pond = document.getElementById("pond");
+  const lilypads = document.getElementById("lilypads");
+  const cssInput = document.getElementById("css-input");
+  const nextBtn = document.getElementById("next-btn");
+  const titleEl = document.getElementById("level-title");
+  const instructionsEl = document.getElementById("instructions");
+  const progressEl = document.getElementById("progress");
+  const cssSelectorEl = document.getElementById("css-selector");
+  const chapterSelect = document.getElementById("chapter-select");
+  const pondContainer = document.getElementById("pond-container");
+
+  function loadLevel(index) {
+    const level = chapters[currentChapter][index];
+    const totalLevels = chapters[currentChapter].length;
+    progressEl.innerText = `Level ${index + 1} of ${totalLevels}`;
+    titleEl.innerText = level.title;
+    instructionsEl.innerHTML = level.instructions;
+    cssSelectorEl.innerText = level.selectorName || "#pond {";
+
+    const propertyCount = Object.keys(level.targetCSS).length;
+    cssInput.rows = Math.max(3, propertyCount + 1);
+
+    cssInput.value = "";
+    pond.style.cssText = "";
+    lilypads.style.cssText = "";
+    nextBtn.disabled = true;
+    nextBtn.innerText = "Next Level";
+    pond.innerHTML = "";
+    lilypads.innerHTML = "";
+
+    pond.classList.remove("celebrating");
+    lilypads.classList.remove("celebrating");
+    document.querySelectorAll(".confetti").forEach(c => c.remove());
+    clearTimeout(celebrationTimer);
+
+    if (currentChapter === "flexbox") {
+      for (const [prop, value] of Object.entries(level.lilypadStyles)) {
+        lilypads.style.setProperty(prop, value);
+      }
+      for (let i = 0; i < level.frogCount; i++) {
+        const lily = document.createElement("img");
+        lily.src = LILYPAD_IMG;
+        lily.className = "lilypad";
+        lilypads.appendChild(lily);
+        const frog = document.createElement("img");
+        frog.src = FROG_IMG;
+        frog.className = "frog";
+        pond.appendChild(frog);
+      }
+    }
+    else if (currentChapter === "boxmodel") {
+      pond.innerHTML = level.html;
+    }
+  }
+
+  chapterSelect.addEventListener("change", (e) => {
+    currentChapter = e.target.value;
+    currentLevel = 0;
+    cssInput.disabled = false;
+    nextBtn.style.display = "block";
+    loadLevel(0);
+  });
+
+  cssInput.addEventListener("input", (e) => {
+    if (currentChapter === "flexbox") {
+      const monkeys = [...pond.querySelectorAll(".frog")];
+      const before = monkeys.map(el => el.getBoundingClientRect());
+      pond.style.cssText = e.target.value;
+
+      requestAnimationFrame(() => {
+        const after = monkeys.map(el => el.getBoundingClientRect());
+        monkeys.forEach((el, i) => {
+          const dx = before[i].left - after[i].left;
+          const dy = before[i].top - after[i].top;
+          el.style.transition = "none";
+          el.style.transform = `translate(${dx}px, ${dy}px) scaleX(-1)`;
+          requestAnimationFrame(() => {
+            el.style.transition = "transform 3s cubic-bezier(0.22, 1, 0.36, 1)";
+            el.style.transform = "translate(0, 0) scaleX(-1)";
+          });
+        });
+        checkWinCondition();
+      });
+    }
+    else if (currentChapter === "boxmodel") {
+      let targets = [];
+      const level = chapters[currentChapter][currentLevel];
+      if (level.targetId) {
+        targets = [document.getElementById(level.targetId)];
+      }
+      else if (level.targetClass) {
+        targets = Array.from(document.querySelectorAll("." + level.targetClass));
+      }
+      targets.forEach((t) => {
+        if (t) {
+          t.style.cssText = e.target.value;
+        }
+      });
+      checkWinCondition();
+    }
+  });
+
+  function checkWinCondition() {
+    const level = chapters[currentChapter][currentLevel];
+    let isWinner = true;
+    let targets = [];
+
+    if (currentChapter === "flexbox") {
+      targets = [pond];
+    }
+    else {
+      if (level.targetId) {
+        targets = [document.getElementById(level.targetId)];
+      }
+      else if (level.targetClass) {
+        targets = Array.from(document.querySelectorAll("." + level.targetClass));
+      }
+    }
+
+    for (let target of targets) {
+      if (!target) continue;
+      for (let prop in level.targetCSS) {
+        const userValue = target.style.getPropertyValue(prop).trim();
+        if (userValue !== level.targetCSS[prop]) {
+          isWinner = false;
+          break;
+        }
+      }
+    }
+
+    if (isWinner) {
+      nextBtn.disabled = false;
+      clearTimeout(celebrationTimer);
+      const delay = currentChapter === "flexbox" ? 3000 : 400;
+
+      celebrationTimer = setTimeout(() => {
+        document.querySelectorAll(".frog").forEach(f => {
+          f.classList.add("win-bounce");
+          f.style.transform = "scaleX(-1)";
+        });
+        document.querySelectorAll(".lilypad").forEach(b => b.classList.add("banana-caught"));
+        pond.classList.add("celebrating");
+        lilypads.classList.add("celebrating");
+        launchConfetti();
+      }, delay);
+    }
+    else {
+      nextBtn.disabled = true;
+      clearTimeout(celebrationTimer);
+      document.querySelectorAll(".frog").forEach(f => f.classList.remove("win-bounce"));
+      document.querySelectorAll(".lilypad").forEach(b => b.classList.remove("banana-caught"));
+      pond.classList.remove("celebrating");
+      lilypads.classList.remove("celebrating");
+      document.querySelectorAll(".confetti").forEach(c => c.remove());
+    }
+  }
+
+  function launchConfetti() {
+    document.querySelectorAll(".confetti").forEach(c => c.remove());
+    const colors = [ "#FFD54F", "#FF7043", "#66BB6A", "#42A5F5", "#AB47BC", "#FFFFFF" ];
+    for (let i = 0; i < 28; i++) {
+      const piece = document.createElement("span");
+      piece.className = "confetti";
+      piece.style.left = `${45 + Math.random() * 10}%`;
+      piece.style.top = `${43 + Math.random() * 10}%`;
+      piece.style.background = colors[i % colors.length];
+      piece.style.setProperty("--dx", `${(Math.random() - 0.5) * 500}px`);
+      piece.style.setProperty("--dy", `${100 + Math.random() * 260}px`);
+      piece.style.animationDelay = `${Math.random() * 0.15}s`;
+      pondContainer.appendChild(piece);
+    }
+  }
+
+  nextBtn.addEventListener("click", () => {
+    const currentChapterLevels = chapters[currentChapter];
+    if (currentLevel < currentChapterLevels.length - 1) {
+      currentLevel++;
+      loadLevel(currentLevel);
+    }
+    else {
+      progressEl.innerText = "Chapter Completed";
+      titleEl.innerText = "Great Job!";
+      instructionsEl.innerHTML = "You have mastered this chapter! Select another chapter from the menu at the top left to keep learning.";
+      pond.innerHTML = "";
+      lilypads.innerHTML = "";
+      cssInput.disabled = true;
+      nextBtn.style.display = "none";
+    }
+  });
+
+  loadLevel(0);
+</script>
+
+</body>
+</html>
