@@ -13,7 +13,9 @@ const BOOT = [
 
 const ROUTES = {
     frontend: { path: "/frontend", label: "Frontend Basics — Flexbox Monkey" },
-    backend: { path: "/backend", label: "Backend Basics" },
+    // /backend may redirect off-site, so it needs a full page load rather
+    // than a client-side route change.
+    backend: { path: "/backend", label: "Backend Basics — Django music app", hard: true },
 };
 
 const HELP = [
@@ -77,7 +79,10 @@ export default function Terminal() {
         const target = ROUTES[key];
         setBusy(true);
         print([line("ok", `opening ${target.label}…`)]);
-        setTimeout(() => router.push(target.path), 550);
+        setTimeout(() => {
+            if (target.hard) window.location.assign(target.path);
+            else router.push(target.path);
+        }, 550);
     }
 
     function run(raw) {
@@ -99,7 +104,7 @@ export default function Terminal() {
             case "ls":
                 print([
                     line("out", "frontend/   Flexbox Monkey — a game for CSS layout"),
-                    line("out", "backend/    coming up next session"),
+                    line("out", "backend/    Django music app — models, auth, templates"),
                 ]);
                 break;
 
