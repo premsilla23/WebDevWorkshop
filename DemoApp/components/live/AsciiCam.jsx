@@ -33,10 +33,13 @@ export default function AsciiCam() {
     const [invert, setInvert] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // The render loop reads these through refs so changing a control never
-    // restarts the camera.
+    // The render loop reads these through a ref so changing a control never
+    // restarts the camera. Written in an effect — mutating a ref during render
+    // is not safe under concurrent rendering.
     const settings = useRef({ cols, ramp, invert });
-    settings.current = { cols, ramp, invert };
+    useEffect(() => {
+        settings.current = { cols, ramp, invert };
+    }, [cols, ramp, invert]);
 
     const stop = useCallback(() => {
         cancelAnimationFrame(rafRef.current);

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./SystemsBoard.module.css";
 
 const INTERVAL_MS = 20000;
 const HISTORY = 40;
 
-function Sparkline({ points, ok }) {
+function Sparkline({ points }) {
     if (points.length < 2) {
         return <div className={styles.sparkEmpty} aria-hidden="true" />;
     }
@@ -46,8 +46,9 @@ const percentile = (values, p) => {
 export default function SystemsBoard() {
     const [data, setData] = useState(null);
     const [error, setError] = useState(false);
-    const historyRef = useRef({});
-    const [, forceRender] = useState(0);
+    // Held in state rather than a ref: it is rendered, so React needs to know
+    // when it changes instead of being nudged by a forced re-render.
+    const [history, setHistory] = useState({});
 
     useEffect(() => {
         let cancelled = false;
@@ -59,14 +60,15 @@ export default function SystemsBoard() {
                 const payload = await response.json();
                 if (cancelled) return;
 
-                for (const service of payload.services) {
-                    const bucket = (historyRef.current[service.id] ??= []);
-                    bucket.push(service.ms);
-                    if (bucket.length > HISTORY) bucket.shift();
-                }
+                setHistory((prev) => {
+                    const next = { ...prev };
+                    for (const service of payload.services) {
+                        next[service.id] = [...(next[service.id] ?? []), service.ms].slice(-HISTORY);
+                    }
+                    return next;
+                });
                 setData(payload);
                 setError(false);
-                forceRender((n) => n + 1);
             } catch {
                 if (!cancelled) setError(true);
             }
@@ -110,7 +112,7 @@ export default function SystemsBoard() {
                 )}
 
                 {services.map((service) => {
-                    const points = historyRef.current[service.id] ?? [];
+                    const points = history[service.id] ?? [];
                     return (
                         <div
                             key={service.id}
@@ -122,7 +124,7 @@ export default function SystemsBoard() {
                                 <span className={styles.detail}>{service.detail}</span>
                             </div>
 
-                            <Sparkline points={points} ok={service.ok} />
+                            <Sparkline points={points} />
 
                             <dl className={styles.metrics}>
                                 <div>

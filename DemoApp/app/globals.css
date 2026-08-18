@@ -140,3 +140,13 @@ textarea {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ------------------------------------------------------------------ *
+ * Boot intro
+ * ------------------------------------------------------------------ */
+
+/* Repeat visits in the same tab: the inline script sets this before paint,
+   so the overlay never renders a frame. */
+html[data-booted="true"] [data-boot-overlay] {
+  display: none !important;
+}

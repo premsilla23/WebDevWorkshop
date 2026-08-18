@@ -133,7 +133,6 @@ export default function Home() {
                 <nav className={styles.statusNav}>
                     <a href="#playground">playground</a>
                     <a href="#sessions">sessions</a>
-                    <Link href="/">the lab</Link>
                 </nav>
             </div>
 

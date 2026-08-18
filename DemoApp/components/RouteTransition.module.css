@@ -1,0 +1,61 @@
+.frame {
+  animation: pageIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pageIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.994);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+/* A thin light bar that crosses the viewport as the new page settles —
+   reads as "something loaded" without blocking anything. */
+.sweep {
+  position: fixed;
+  inset-inline: 0;
+  top: 54px;
+  height: 1px;
+  z-index: 60;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--cyan) 35%,
+    var(--purple) 65%,
+    transparent
+  );
+  transform-origin: left center;
+  animation: sweep 760ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes sweep {
+  0% {
+    transform: scaleX(0);
+    opacity: 1;
+  }
+  60% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frame,
+  .sweep {
+    animation: none;
+  }
+  .sweep {
+    display: none;
+  }
+}

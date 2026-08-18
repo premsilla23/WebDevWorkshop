@@ -12,19 +12,6 @@ export const metadata = {
 export default function Home() {
     return (
         <div className={styles.page}>
-            {/* ------------------------------ top bar ------------------------------ */}
-            <header className={styles.bar}>
-                <div className={styles.barInner}>
-                    <span className={styles.mark}>Coding Club · BITS Pilani</span>
-                    <nav className={styles.barNav}>
-                        <a href="#camera">camera</a>
-                        <Link href="/lab">the lab</Link>
-                    </nav>
-                    <Link href="/club" className={styles.enter}>
-                        workshop <span aria-hidden="true">→</span>
-                    </Link>
-                </div>
-            </header>
 
             <main>
                 {/* ------------------------- editable hero ------------------------- */}

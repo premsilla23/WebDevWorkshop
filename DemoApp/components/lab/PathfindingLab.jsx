@@ -50,7 +50,9 @@ export default function PathfindingLab() {
     const [speed, setSpeed] = useState(6);
     const [summary, setSummary] = useState(null);
     const speedRef = useRef(speed);
-    speedRef.current = speed;
+    useEffect(() => {
+        speedRef.current = speed;
+    }, [speed]);
 
     /* ---------------------------------------------------------------- *
      * Drawing
@@ -237,11 +239,15 @@ export default function PathfindingLab() {
         gridRef.current = generateField(COLS, ROWS);
         gridRef.current[startRef.current] = EMPTY;
         gridRef.current[goalRef.current] = EMPTY;
-        run();
+
+        // Deferred by a tick: run() sets state, and doing that synchronously in
+        // an effect body cascades an extra render before the first paint.
+        const kickoff = setTimeout(run, 0);
 
         const onResize = () => paintAll();
         window.addEventListener("resize", onResize);
         return () => {
+            clearTimeout(kickoff);
             window.removeEventListener("resize", onResize);
             cancelAnimationFrame(rafRef.current);
         };

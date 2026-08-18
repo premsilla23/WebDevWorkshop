@@ -13,22 +13,6 @@ export const metadata = {
 export default function Home() {
     return (
         <div className={styles.page}>
-            {/* ------------------------------ top bar ------------------------------ */}
-            <div className={styles.bar}>
-                <div className={styles.barInner}>
-                    <Link href="/" className={styles.mark}>
-                        ← Coding Club · BITS Pilani
-                    </Link>
-                    <nav className={styles.barNav}>
-                        <a href="#pathfinding">pathfinding</a>
-                        <a href="#systems">systems</a>
-                        <a href="#shader">shader</a>
-                    </nav>
-                    <Link href="/club" className={styles.enter}>
-                        workshop <span aria-hidden="true">→</span>
-                    </Link>
-                </div>
-            </div>
 
             <main>
                 {/* ------------------------------- hero ------------------------------- */}

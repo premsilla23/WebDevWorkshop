@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import styles from "./EditableHero.module.css";
 
 const DEFAULTS = {
@@ -27,7 +27,9 @@ function buildRules({ accent, size, weight, tracking, radius }) {
             selector: "#hero h1",
             decls: [
                 ["color", accent],
-                ["font-size", `${size}rem`],
+                // min() keeps a big headline from overflowing a phone without
+                // needing a second, screen-dependent source of truth.
+                ["font-size", `min(${size}rem, 11vw)`],
                 ["font-weight", String(weight)],
                 ["letter-spacing", `${(tracking / 100).toFixed(2)}em`],
             ],
@@ -76,7 +78,6 @@ export default function EditableHero() {
     const [style, setStyle] = useState(DEFAULTS);
     const [headlineKey, setHeadlineKey] = useState(0);
     const [touched, setTouched] = useState(false);
-    const headlineRef = useRef(null);
 
     const rules = useMemo(() => buildRules(style), [style]);
     const css = useMemo(() => serialise(rules), [rules]);
@@ -105,7 +106,6 @@ export default function EditableHero() {
 
                 <h1
                     key={headlineKey}
-                    ref={headlineRef}
                     className={styles.headline}
                     contentEditable
                     suppressContentEditableWarning

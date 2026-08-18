@@ -96,6 +96,14 @@
   color: var(--purple);
   flex-shrink: 0;
   user-select: none;
+  white-space: pre;
+}
+
+/* On a phone the full host eats the whole line, so keep just `:~$`. */
+@media (max-width: 540px) {
+  .promptUser {
+    display: none;
+  }
 }
 
 .cmd .text {

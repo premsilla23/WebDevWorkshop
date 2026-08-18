@@ -1,0 +1,193 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background-color: #080b10;
+  background-image:
+    radial-gradient(60% 50% at 50% 42%, rgba(94, 234, 212, 0.07), transparent 70%),
+    radial-gradient(50% 40% at 50% 60%, rgba(228, 93, 255, 0.06), transparent 70%);
+  animation: overlayIn 260ms ease-out both;
+}
+
+.leaving {
+  animation: overlayOut 620ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes overlayOut {
+  to {
+    opacity: 0;
+    transform: scale(1.06);
+    filter: blur(10px);
+    visibility: hidden;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * The club mark
+ * ------------------------------------------------------------------ */
+
+.scene {
+  position: relative;
+  width: 116px;
+  margin-bottom: 2.6rem;
+  color: var(--paper);
+  filter: drop-shadow(0 0 14px rgba(94, 234, 212, 0.35));
+  animation: settle 1.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.logo {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* The cube skeleton fades up first, so the C's have something to land on. */
+.logo :global(.cc-edges) {
+  opacity: 0;
+  color: rgba(94, 234, 212, 0.5);
+  animation: edgesIn 900ms ease-out 80ms both;
+}
+
+/* Each face's C draws itself, staggered by the delay set on the element. */
+.logo :global(.cc-face) path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 760ms cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+.logo :global(.cc-face-left) {
+  color: #cfe9ff;
+}
+
+.logo :global(.cc-face-right) {
+  color: var(--purple);
+}
+
+.logo :global(.cc-face-top) {
+  color: var(--cyan);
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes edgesIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* A slow lift as the mark finishes assembling. */
+@keyframes settle {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.94);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.shadow {
+  position: absolute;
+  left: 50%;
+  bottom: -20px;
+  width: 74px;
+  height: 11px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: rgba(94, 234, 212, 0.2);
+  filter: blur(9px);
+  animation: breathe 2.6s ease-in-out 1.3s infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scaleX(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scaleX(0.76);
+    opacity: 0.28;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Wordmark and progress
+ * ------------------------------------------------------------------ */
+
+.mark {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.38em;
+  text-indent: 0.38em;
+  color: var(--paper);
+  animation: rise 620ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+.sub {
+  margin-top: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--slate-dim);
+  animation: rise 620ms cubic-bezier(0.22, 1, 0.36, 1) 220ms both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.track {
+  margin-top: 2rem;
+  width: 132px;
+  height: 1px;
+  background: var(--line-2);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  animation: scan 1.15s ease-in-out infinite;
+}
+
+@keyframes scan {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(360%);
+  }
+}

@@ -96,8 +96,7 @@
 
 .eyebrow {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: 0.6rem;
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -107,6 +106,7 @@
 }
 
 .eyebrowDot {
+  flex: 0 0 auto;
   width: 5px;
   height: 5px;
   border-radius: 50%;

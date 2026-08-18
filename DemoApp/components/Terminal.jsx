@@ -4,7 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./Terminal.module.css";
 
-const PROMPT = "visitor@codingclub:~$";
+/* Split so the long host part can be dropped on narrow screens rather than
+   overflowing the terminal. */
+function Prompt() {
+    return (
+        <span className={styles.prompt}>
+            <span className={styles.promptUser}>visitor@codingclub</span>:~$
+        </span>
+    );
+}
 
 const BOOT = [
     { kind: "dim", text: "webdev-vertical v0.2.0 — Coding Club, BITS Pilani" },
@@ -61,11 +69,20 @@ export default function Terminal() {
     const inputRef = useRef(null);
     const scrollRef = useRef(null);
 
-    /* Boot lines are added on the client so the server markup stays static. */
+    /* Boot lines are added on the client so the server markup stays static.
+       The timers are cleared on unmount, otherwise a remount (StrictMode does
+       one in development) prints the banner a second time. */
     useEffect(() => {
-        BOOT.forEach((entry, i) => {
-            setTimeout(() => setLines((prev) => [...prev, line(entry.kind, entry.text)]), 260 * i);
-        });
+        const timers = BOOT.map((entry, i) =>
+            setTimeout(() => {
+                setLines((prev) =>
+                    prev.some((l) => l.text === entry.text)
+                        ? prev
+                        : [...prev, line(entry.kind, entry.text)]
+                );
+            }, 260 * i)
+        );
+        return () => timers.forEach(clearTimeout);
     }, []);
 
     useEffect(() => {
@@ -191,13 +208,13 @@ export default function Terminal() {
             <div ref={scrollRef} className={styles.screen}>
                 {lines.map((entry) => (
                     <p key={entry.id} className={`${styles.line} ${styles[entry.kind]}`}>
-                        {entry.kind === "cmd" && <span className={styles.prompt}>{PROMPT}</span>}
+                        {entry.kind === "cmd" && <Prompt />}
                         <span className={styles.text}>{entry.text}</span>
                     </p>
                 ))}
 
                 <div className={styles.inputRow}>
-                    <span className={styles.prompt}>{PROMPT}</span>
+                    <Prompt />
                     <span className={styles.inputWrap}>
                         <input
                             ref={inputRef}
